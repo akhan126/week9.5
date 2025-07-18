@@ -102,7 +102,7 @@ arrow_annotation = alt.Chart(pd.DataFrame({
 # ---- Emoji annotation ----
 emoji_annotation = alt.Chart(pd.DataFrame({
     "Antibiotic": ["Penicillin"],
-    "MIC": [800],
+    "MIC": [400],
     "emoji": ["😱"]
 })).mark_text(
     align="center",
