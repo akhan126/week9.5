@@ -34,7 +34,14 @@ melted_df = df.melt(
 )
 
 # ---- Base Boxplot ----
-base_boxplot = alt.Chart(melted_df).mark_boxplot(extent='min-max', size=30).encode(
+# Added a small 'size' and opacity to ensure boxes are visible even if narrow
+# Also applied stroke and strokeWidth to the 'box' sub-property for clarity
+base_boxplot = alt.Chart(melted_df).mark_boxplot(
+    extent='min-max',
+    size=20, # Give it a fixed size to ensure visibility
+    opacity=0.7, # Add some opacity
+    box=alt.MarkConfig(stroke='black', strokeWidth=0.5) # Apply stroke to the box itself
+).encode(
     x=alt.X("Antibiotic:N", title=None, axis=alt.Axis(labelAngle=0)),
     y=alt.Y("MIC:Q", scale=alt.Scale(type="log"), title="MIC (µg/mL, log scale)"),
     color=alt.Color(
@@ -43,6 +50,24 @@ base_boxplot = alt.Chart(melted_df).mark_boxplot(extent='min-max', size=30).enco
         legend=alt.Legend(title="Gram Staining")
     )
 )
+
+# ---- Layer individual points on top of the boxplot ----
+# This ensures all data points are visible, even if the box is very small
+point_layer = alt.Chart(melted_df).mark_circle(size=40, opacity=0.8, stroke='black', strokeWidth=0.2).encode(
+    x=alt.X("Antibiotic:N", title=None, axis=alt.Axis(labelAngle=0)),
+    y=alt.Y("MIC:Q", scale=alt.Scale(type="log")), # Share the same log scale
+    color=alt.Color(
+        "Gram_Staining:N",
+        scale=alt.Scale(range=["#1f77b4", "#ff7f0e"])
+    ),
+    tooltip=[
+        alt.Tooltip("Bacteria:N", title="Bacterium"),
+        alt.Tooltip("Antibiotic:N", title="Antibiotic"),
+        alt.Tooltip("MIC:Q", title="MIC (µg/mL)", format=".3f"),
+        alt.Tooltip("Gram_Staining:N", title="Gram Staining")
+    ]
+)
+
 
 # ---- Annotation for Gram-positive sensitivity ----
 annotations = alt.Chart(pd.DataFrame({
@@ -75,24 +100,23 @@ arrow_annotation = alt.Chart(pd.DataFrame({
 )
 
 # ---- Emoji annotation ----
-# Position it near the Penicillin column, slightly above the arrow annotation
 emoji_annotation = alt.Chart(pd.DataFrame({
     "Antibiotic": ["Penicillin"],
-    "MIC": [800], # Adjust this value to move the emoji up/down
+    "MIC": [800],
     "emoji": ["😱"]
 })).mark_text(
     align="center",
     baseline="middle",
-    fontSize=20 # Adjust size as needed
+    fontSize=20
 ).encode(
     x="Antibiotic:N",
     y="MIC:Q",
     text="emoji:N"
 )
 
-
-# ---- Combine all chart elements ----
-final_chart = (base_boxplot + annotations + arrow_annotation + emoji_annotation).configure_axis(
+# ---- Combine all chart elements for the main box plot ----
+# Layer the points on top of the boxplot
+final_chart = (base_boxplot + point_layer + annotations + arrow_annotation + emoji_annotation).configure_axis(
     labelFontSize=12,
     titleFontSize=14
 ).configure_legend(
@@ -100,18 +124,54 @@ final_chart = (base_boxplot + annotations + arrow_annotation + emoji_annotation)
     labelFontSize=12
 )
 
+# ---- Scatter Plot for Individual Bacteria MICs (kept as a separate detailed view) ----
+individual_mic_chart = alt.Chart(melted_df).mark_circle(size=60, opacity=0.7).encode(
+    x=alt.X("Antibiotic:N", title=None, axis=alt.Axis(labelAngle=0)),
+    y=alt.Y("MIC:Q", scale=alt.Scale(type="log"), title="MIC (µg/mL, log scale)"),
+    color=alt.Color(
+        "Gram_Staining:N",
+        scale=alt.Scale(range=["#1f77b4", "#ff7f0e"]),
+        legend=alt.Legend(title="Gram Staining")
+    ),
+    tooltip=[
+        alt.Tooltip("Bacteria:N", title="Bacterium"),
+        alt.Tooltip("Antibiotic:N", title="Antibiotic"),
+        alt.Tooltip("MIC:Q", title="MIC (µg/mL)", format=".3f"),
+        alt.Tooltip("Gram_Staining:N", title="Gram Staining"),
+        alt.Tooltip("Genus:N", title="Genus")
+    ]
+).properties(
+    title="Individual Bacteria MIC Values"
+).interactive() # Allows zooming and panning
+
+
 # ---- Streamlit App Layout ----
 st.title("Antibiotic Effectiveness by Gram Staining")
 st.markdown("**Lower MIC = More Effective** - Penicillin shows reduced effectiveness against Gram-negative bacteria.")
 
-# Display the chart
+# Display the main chart
 st.altair_chart(final_chart, use_container_width=True)
 
-# Add explanation
+# Add explanation for the main chart
 st.markdown("""
-### Key Observations:
+### Key Observations (Box Plot):
 - **Penicillin** is highly effective against Gram-positive bacteria (low MIC values) but much less effective against Gram-negative bacteria (high MIC values).
 - **Neomycin** and **Streptomycin** show more consistent effectiveness across both Gram types.
 - The outer membrane of Gram-negative bacteria makes them naturally resistant to Penicillin.
 """)
+
+st.markdown("---") # Separator
+
+st.subheader("Detailed View: Individual Bacteria MICs")
+st.markdown("Hover over points for details. You can zoom and pan this chart.")
+st.altair_chart(individual_mic_chart, use_container_width=True)
+
+# Add explanation for the new chart
+st.markdown("""
+### Understanding the Individual MICs Chart:
+This scatter plot shows the Minimum Inhibitory Concentration (MIC) for each specific bacterium against the three antibiotics. Each circle represents a single bacterium's response to an antibiotic.
+- **Hover** over any circle to see the exact bacterium name, antibiotic, MIC value, Gram staining, and genus.
+- This view helps to identify individual bacteria that might be particularly sensitive or resistant, even within a group.
+""")
+
 
