@@ -113,10 +113,10 @@ emoji_annotation = alt.Chart(pd.DataFrame({
 # ---- Annotation for Neomycin (Effective for both) ----
 neomycin_annotation = alt.Chart(pd.DataFrame({
     "Antibiotic": ["Neomycin"],
-    "MIC": [0.5], # Adjusted MIC for better visibility on log scale
+    "MIC": [0.15], # Adjusted MIC for better visibility on log scale
     "text": ["Effective for both"]
 })).mark_text(
-    align="center", dx=0, dy=-10, fontSize=10, color="black"
+    align="center", dx=0, dy=-10, fontSize=10, color="green"
 ).encode(
     x="Antibiotic:N",
     y="MIC:Q",
@@ -126,10 +126,10 @@ neomycin_annotation = alt.Chart(pd.DataFrame({
 # ---- New Annotation for Streptomycin (Effective for both) ----
 streptomycin_annotation = alt.Chart(pd.DataFrame({
     "Antibiotic": ["Streptomycin"],
-    "MIC": [0.5], # Adjusted MIC for better visibility on log scale (can be tuned)
+    "MIC": [0.15], # Adjusted MIC for better visibility on log scale (can be tuned)
     "text": ["Effective for both"]
 })).mark_text(
-    align="center", dx=0, dy=-10, fontSize=10, color="black"
+    align="center", dx=0, dy=-10, fontSize=10, color="green"
 ).encode(
     x="Antibiotic:N",
     y="MIC:Q",
