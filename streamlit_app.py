@@ -40,7 +40,7 @@ base_boxplot = alt.Chart(melted_df).mark_boxplot(
     opacity=0.7,
     box=alt.MarkConfig(stroke='black', strokeWidth=0.5)
 ).encode(
-    x=alt.X("Antibiotic:N", title=None, axis=alt.Axis(labelAngle=0)),
+    x=alt.X("Antibiotic:N", title="Antibiotic", axis=alt.Axis(labelAngle=0)), # Added title here
     y=alt.Y("MIC:Q", scale=alt.Scale(type="log"), title="MIC (µg/mL, log scale)"),
     color=alt.Color(
         "Gram_Staining:N",
@@ -51,7 +51,7 @@ base_boxplot = alt.Chart(melted_df).mark_boxplot(
 
 # ---- Layer individual points on top of the boxplot ----
 point_layer = alt.Chart(melted_df).mark_circle(size=40, opacity=0.8, stroke='black', strokeWidth=0.2).encode(
-    x=alt.X("Antibiotic:N", title=None, axis=alt.Axis(labelAngle=0)),
+    x=alt.X("Antibiotic:N", title="Antibiotic", axis=alt.Axis(labelAngle=0)), # Added title here
     y=alt.Y("MIC:Q", scale=alt.Scale(type="log")),
     color=alt.Color(
         "Gram_Staining:N",
@@ -148,8 +148,7 @@ final_chart = (base_boxplot + point_layer + annotations + arrow_annotation + emo
 
 # ---- Streamlit App Layout ----
 st.title("Wall Matters: How Bacterial Barriers Block Penicillin")
-st.markdown("**Minimum inhibitory concentration (MIC)** is the lowest concentration of a chemical, which prevents visible in vitro growth of bacteria.") # Added MIC definition here
-st.markdown("**Lower MIC = More Effective** - Penicillin shows reduced effectiveness against Gram-negative bacteria.")
+st.markdown("**Lower MIC = More Effective** - Penicillin shows reduced effectiveness against Gram-negative bacteria. Minimum inhibitory concentration (MIC) is the lowest concentration of a chemical, which prevents visible in vitro growth of bacteria (Wikipedia).")
 
 # Display the main chart
 st.altair_chart(final_chart, use_container_width=True)
