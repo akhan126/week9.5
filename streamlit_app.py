@@ -148,6 +148,7 @@ final_chart = (base_boxplot + point_layer + annotations + arrow_annotation + emo
 
 # ---- Streamlit App Layout ----
 st.title("Wall Matters: How Bacterial Barriers Block Penicillin")
+st.markdown("**Minimum inhibitory concentration (MIC)** is the lowest concentration of a chemical, which prevents visible in vitro growth of bacteria.") # Added MIC definition here
 st.markdown("**Lower MIC = More Effective** - Penicillin shows reduced effectiveness against Gram-negative bacteria.")
 
 # Display the main chart
@@ -155,7 +156,7 @@ st.altair_chart(final_chart, use_container_width=True)
 
 # Add explanation for the main chart
 st.markdown("""
-### Key Observations (Box Plot):
+### Key Takeaway:
 - **Penicillin** is highly effective against Gram-positive bacteria (low MIC values) but much less effective against Gram-negative bacteria (high MIC values).
 - **Neomycin** and **Streptomycin** show more consistent effectiveness across both Gram types.
 - The outer membrane of Gram-negative bacteria makes them naturally resistant to Penicillin.
